@@ -49,11 +49,11 @@
 	var ReactDOM = __webpack_require__(2);
 	var redux_1 = __webpack_require__(3);
 	var react_redux_1 = __webpack_require__(17);
-	var Pane_1 = __webpack_require__(26);
-	var ShapeReducer_1 = __webpack_require__(34);
+	var pane_1 = __webpack_require__(26);
+	var shape_reducer_1 = __webpack_require__(30);
 	var defaultState = { nextShapeId: 0, paletteWidth: 60, shapeWidth: 100, shapeHeight: 100, shapes: [] };
-	var store = redux_1.createStore(ShapeReducer_1.default, defaultState);
-	ReactDOM.render(React.createElement(react_redux_1.Provider, {store: store}, React.createElement(Pane_1.Pane, null)), document.getElementById("pane"));
+	var store = redux_1.createStore(shape_reducer_1.default, defaultState);
+	ReactDOM.render(React.createElement(react_redux_1.Provider, {store: store}, React.createElement(pane_1.Pane, null)), document.getElementById("pane"));
 
 
 /***/ },
@@ -1756,15 +1756,15 @@
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var React = __webpack_require__(1);
-	var Palette_1 = __webpack_require__(27);
-	var Canvas_1 = __webpack_require__(29);
+	var palette_1 = __webpack_require__(27);
+	var canvas_1 = __webpack_require__(29);
 	var Pane = (function (_super) {
 	    __extends(Pane, _super);
 	    function Pane() {
 	        _super.apply(this, arguments);
 	    }
 	    Pane.prototype.render = function () {
-	        return (React.createElement("div", null, React.createElement(Palette_1.Palette, null), React.createElement(Canvas_1.default, null)));
+	        return (React.createElement("div", null, React.createElement(palette_1.Palette, null), React.createElement(canvas_1.default, null)));
 	    };
 	    return Pane;
 	}(React.Component));
@@ -1782,14 +1782,14 @@
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var React = __webpack_require__(1);
-	var Tool_1 = __webpack_require__(28);
+	var tool_1 = __webpack_require__(28);
 	var Palette = (function (_super) {
 	    __extends(Palette, _super);
 	    function Palette() {
 	        _super.apply(this, arguments);
 	    }
 	    Palette.prototype.render = function () {
-	        return (React.createElement("div", {id: "palette", className: "palette"}, React.createElement(Tool_1.Tool, {id: "rectangle"}, React.createElement("rect", {width: "100%", height: "100%", className: "shape"})), React.createElement(Tool_1.Tool, {id: "circle"}, React.createElement("circle", {cx: "50%", cy: "50%", r: "50%", className: "shape"})), React.createElement(Tool_1.Tool, {id: "triangle"}, React.createElement("svg", {width: '100%', height: '100%', viewBox: "0 0 100 100", preserveAspectRatio: "none"}, React.createElement("polygon", {points: "50 0, 0 100, 100 100", className: "shape"})))));
+	        return (React.createElement("div", {id: "palette", className: "palette"}, React.createElement(tool_1.Tool, {id: "rectangle"}, React.createElement("rect", {width: "100%", height: "100%", className: "shape"})), React.createElement(tool_1.Tool, {id: "circle"}, React.createElement("circle", {cx: "50%", cy: "50%", r: "50%", className: "shape"})), React.createElement(tool_1.Tool, {id: "triangle"}, React.createElement("svg", {width: '100%', height: '100%', viewBox: "0 0 100 100", preserveAspectRatio: "none"}, React.createElement("polygon", {points: "50 0, 0 100, 100 100", className: "shape"})))));
 	    };
 	    return Palette;
 	}(React.Component));
@@ -1813,11 +1813,10 @@
 	        _super.apply(this, arguments);
 	    }
 	    Tool.prototype.render = function () {
-	        return (React.createElement("span", {draggable: "true", className: "tool", id: this.props.id, onDragStart: this.onDragStart}, React.createElement("svg", {className: "tool"}, "before", this.props.children, "after")));
+	        return (React.createElement("span", {draggable: "true", className: "tool", onDragStart: this.onDragStart.bind(this)}, React.createElement("svg", {className: "tool"}, "before", this.props.children, "after")));
 	    };
-	    Tool.prototype.onDragStart = function (ev) {
-	        ev.dataTransfer.setData("shape", ev.target.id);
-	        console.log('onDragStart');
+	    Tool.prototype.onDragStart = function (event) {
+	        event.dataTransfer.setData("shape", this.props.id);
 	    };
 	    return Tool;
 	}(React.Component));
@@ -1834,203 +1833,50 @@
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var __assign = (this && this.__assign) || Object.assign || function(t) {
-	    for (var s, i = 1, n = arguments.length; i < n; i++) {
-	        s = arguments[i];
-	        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-	            t[p] = s[p];
-	    }
-	    return t;
-	};
 	var React = __webpack_require__(1);
 	var react_redux_1 = __webpack_require__(17);
-	var Circle_1 = __webpack_require__(30);
-	var Square_1 = __webpack_require__(32);
-	var Triangle_1 = __webpack_require__(33);
-	var ShapeReducer_1 = __webpack_require__(34);
+	var shape_reducer_1 = __webpack_require__(30);
+	var shape_factory_1 = __webpack_require__(31);
 	var Canvas = (function (_super) {
 	    __extends(Canvas, _super);
-	    function Canvas(props, context) {
-	        _super.call(this, props, context);
+	    function Canvas() {
+	        _super.apply(this, arguments);
 	    }
-	    Canvas.prototype.shapeAttributes = function (s) {
-	        return { x: s.x, y: s.y, width: s.w, height: s.h, key: s.id, id: s.id,
-	            onDrop: this.props.moveShape, onBringForward: this.props.bringForward, onPushBack: this.props.pushBack };
-	    };
-	    Canvas.prototype.generateShape = function (shape_data) {
-	        var attributes = this.shapeAttributes(shape_data);
-	        switch (shape_data.name) {
-	            case 'circle':
-	                return React.createElement(Circle_1.Circle, __assign({}, attributes));
-	            case 'rectangle':
-	                return React.createElement(Square_1.Square, __assign({}, attributes));
-	            case 'triangle':
-	                return React.createElement(Triangle_1.Triangle, __assign({}, attributes));
-	        }
+	    Canvas.prototype.generateShape = function (shapeData) {
+	        return shape_factory_1.ShapeFactory.createShape(shapeData, this.props);
 	    };
 	    Canvas.prototype.render = function () {
 	        var shapes = this.props.shapes.map(this.generateShape.bind(this));
 	        return (React.createElement("div", {className: "canvas-container", onDrop: this.onCanvasDrop.bind(this), onDragOver: this.onCanvasDragOver.bind(this)}, React.createElement("svg", {className: "canvas"}, shapes)));
 	    };
-	    Canvas.prototype.onCanvasDrop = function (ev) {
-	        console.log(ev.dataTransfer.getData("shape"));
-	        ev.preventDefault();
-	        this.props.addShape(ev.dataTransfer.getData("shape"), ev.pageX, ev.pageY, this.props.shapeHeight, this.props.shapeWidth);
+	    Canvas.prototype.onCanvasDrop = function (event) {
+	        event.preventDefault();
+	        this.props.addShape(event.dataTransfer.getData("shape"), event.pageX, event.pageY, this.props.shapeHeight, this.props.shapeWidth);
 	    };
-	    Canvas.prototype.onCanvasDragOver = function (ev) {
-	        console.log('onCanvasDragOver');
-	        ev.preventDefault();
+	    Canvas.prototype.onCanvasDragOver = function (event) {
+	        event.preventDefault();
 	    };
 	    return Canvas;
 	}(React.Component));
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = react_redux_1.connect(function (state) { return ({ shapes: state.shapes, shapeHeight: state.shapeHeight, shapeWidth: state.shapeWidth }); }, function (dispatch) { return ({
-	    moveShape: function (id, x, y) { return dispatch({ type: ShapeReducer_1.Actions.SHAPE_CHANGE, id: id, x: x, y: y }); },
-	    pushBack: function (id) { return dispatch({ type: ShapeReducer_1.Actions.SHAPE_BACK, id: id }); },
-	    bringForward: function (id) { return dispatch({ type: ShapeReducer_1.Actions.SHAPE_FORWARD, id: id }); },
-	    addShape: function (name, x, y, w, h) { return dispatch({ type: ShapeReducer_1.Actions.SHAPE_ADD, name: name, x: x, y: y, w: w, h: h }); }
+	    moveShape: function (id, x, y) { return dispatch({ type: shape_reducer_1.Actions.SHAPE_MOVE, id: id, x: x, y: y }); },
+	    pushBack: function (id) { return dispatch({ type: shape_reducer_1.Actions.SHAPE_BACK, id: id }); },
+	    bringForward: function (id) { return dispatch({ type: shape_reducer_1.Actions.SHAPE_FORWARD, id: id }); },
+	    addShape: function (name, x, y, width, height) {
+	        return dispatch({ type: shape_reducer_1.Actions.SHAPE_ADD, name: name, x: x, y: y, width: width, height: height });
+	    }
 	}); })(Canvas);
 
 
 /***/ },
 /* 30 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var React = __webpack_require__(1);
-	var Shape_1 = __webpack_require__(31);
-	var Circle = (function (_super) {
-	    __extends(Circle, _super);
-	    function Circle() {
-	        _super.apply(this, arguments);
-	    }
-	    Circle.prototype.render = function () {
-	        var radius = Math.min(this.props.height, this.props.width) / 2;
-	        return React.createElement("circle", {id: this.props.id, cx: this.state.x, cy: this.state.y, r: radius, className: "shape", onMouseDown: this.startDrug.bind(this), onDoubleClick: this.dbClick.bind(this)});
-	    };
-	    return Circle;
-	}(Shape_1.Shape));
-	exports.Circle = Circle;
-
-
-/***/ },
-/* 31 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var React = __webpack_require__(1);
-	var Shape = (function (_super) {
-	    __extends(Shape, _super);
-	    function Shape() {
-	        _super.apply(this, arguments);
-	        this.mouseMove = this.onMouseMove.bind(this);
-	        this.mouseUp = this.onMouseUp.bind(this);
-	        this.state = { x: this.props.x, y: this.props.y };
-	    }
-	    Shape.prototype.startDrug = function () {
-	        document.addEventListener("mouseup", this.mouseUp);
-	        document.addEventListener("mousemove", this.mouseMove);
-	    };
-	    Shape.prototype.onMouseMove = function (event) {
-	        if (Shape.isOnDocument(event.pageX, event.pageY)) {
-	            this.setState({ x: event.layerX, y: event.layerY });
-	        }
-	    };
-	    Shape.prototype.onMouseUp = function (event) {
-	        document.removeEventListener("mousemove", this.mouseMove);
-	        document.removeEventListener("mouseup", this.mouseUp);
-	        this.props.onDrop(this.props.id, event.layerX, event.layerY);
-	    };
-	    Shape.prototype.dbClick = function (event) {
-	        if (event.altKey) {
-	            this.props.onPushBack(this.props.id);
-	        }
-	        else {
-	            this.props.onBringForward(this.props.id);
-	        }
-	    };
-	    Shape.isOnDocument = function (x, y) {
-	        return y > 0 && x > 0 &&
-	            x < document.body.clientWidth &&
-	            y < document.body.clientHeight;
-	    };
-	    return Shape;
-	}(React.Component));
-	exports.Shape = Shape;
-
-
-/***/ },
-/* 32 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var React = __webpack_require__(1);
-	var Shape_1 = __webpack_require__(31);
-	var Square = (function (_super) {
-	    __extends(Square, _super);
-	    function Square() {
-	        _super.apply(this, arguments);
-	    }
-	    Square.prototype.render = function () {
-	        return (React.createElement("rect", {id: this.props.id, className: "shape", x: this.state.x - this.props.width / 2, y: this.state.y - this.props.height / 2, width: this.props.width, height: this.props.height, onMouseDown: this.startDrug.bind(this), onDoubleClick: this.dbClick.bind(this)}));
-	    };
-	    return Square;
-	}(Shape_1.Shape));
-	exports.Square = Square;
-
-
-/***/ },
-/* 33 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var React = __webpack_require__(1);
-	var Shape_1 = __webpack_require__(31);
-	var Triangle = (function (_super) {
-	    __extends(Triangle, _super);
-	    function Triangle() {
-	        _super.apply(this, arguments);
-	    }
-	    Triangle.prototype.render = function () {
-	        var top = this.state.x + " " + (this.state.y - this.props.height / 2);
-	        var left = (this.state.x - this.props.width / 2) + " " + (this.state.y + this.props.height / 2);
-	        var right = (this.state.x + this.props.width / 2) + " " + (this.state.y + this.props.height / 2);
-	        var points = top + ", " + left + ", " + right;
-	        return (React.createElement("polygon", {points: points, className: "shape", onMouseDown: this.startDrug.bind(this), onDoubleClick: this.dbClick.bind(this)}));
-	    };
-	    return Triangle;
-	}(Shape_1.Shape));
-	exports.Triangle = Triangle;
-
-
-/***/ },
-/* 34 */
 /***/ function(module, exports) {
 
 	"use strict";
 	(function (Actions) {
 	    Actions[Actions["SHAPE_ADD"] = 0] = "SHAPE_ADD";
-	    Actions[Actions["SHAPE_CHANGE"] = 1] = "SHAPE_CHANGE";
+	    Actions[Actions["SHAPE_MOVE"] = 1] = "SHAPE_MOVE";
 	    Actions[Actions["SHAPE_BACK"] = 2] = "SHAPE_BACK";
 	    Actions[Actions["SHAPE_FORWARD"] = 3] = "SHAPE_FORWARD";
 	})(exports.Actions || (exports.Actions = {}));
@@ -2040,8 +1886,8 @@
 	    switch (action.type) {
 	        case Actions.SHAPE_ADD:
 	            return addShape(state, action);
-	        case Actions.SHAPE_CHANGE:
-	            return changeShape(state, action);
+	        case Actions.SHAPE_MOVE:
+	            return moveShape(state, action);
 	        case Actions.SHAPE_BACK:
 	            return shapeBack(state, action);
 	        case Actions.SHAPE_FORWARD:
@@ -2061,7 +1907,7 @@
 	    delete shape['type'];
 	    return Object.assign({}, state, { nextShapeId: id + 1, shapes: state.shapes.concat([shape]) });
 	}
-	function changeShape(state, action) {
+	function moveShape(state, action) {
 	    var shapeIndex = getShapeIndex(state.shapes, action.id);
 	    var new_shape = Object.assign({}, state.shapes[shapeIndex], { x: action.x, y: action.y });
 	    var new_shapes = state.shapes.slice();
@@ -2088,6 +1934,191 @@
 	    return Object.assign({}, state, { shapes: new_shapes });
 	    var _a;
 	}
+
+
+/***/ },
+/* 31 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __assign = (this && this.__assign) || Object.assign || function(t) {
+	    for (var s, i = 1, n = arguments.length; i < n; i++) {
+	        s = arguments[i];
+	        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+	            t[p] = s[p];
+	    }
+	    return t;
+	};
+	var React = __webpack_require__(1);
+	var circle_1 = __webpack_require__(32);
+	var square_1 = __webpack_require__(34);
+	var triangle_1 = __webpack_require__(35);
+	var ShapeFactory = (function () {
+	    function ShapeFactory() {
+	    }
+	    ShapeFactory.createShape = function (shapeData, dispatcher) {
+	        console.log(dispatcher);
+	        var attributes = this.shapeAttributes(shapeData, dispatcher);
+	        switch (shapeData.name) {
+	            case 'circle':
+	                return React.createElement(circle_1.Circle, __assign({}, attributes));
+	            case 'rectangle':
+	                return React.createElement(square_1.Square, __assign({}, attributes));
+	            case 'triangle':
+	                return React.createElement(triangle_1.Triangle, __assign({}, attributes));
+	        }
+	    };
+	    ShapeFactory.shapeAttributes = function (s, dispatcher) {
+	        return { x: s.x, y: s.y, width: s.width, height: s.height, key: s.id, id: s.id,
+	            moveShape: dispatcher.moveShape, bringForward: dispatcher.bringForward, pushBack: dispatcher.pushBack };
+	    };
+	    return ShapeFactory;
+	}());
+	exports.ShapeFactory = ShapeFactory;
+
+
+/***/ },
+/* 32 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var React = __webpack_require__(1);
+	var shape_1 = __webpack_require__(33);
+	var Circle = (function (_super) {
+	    __extends(Circle, _super);
+	    function Circle() {
+	        _super.apply(this, arguments);
+	    }
+	    Circle.prototype.render = function () {
+	        var radius = Math.min(this.props.height, this.props.width) / 2;
+	        return React.createElement("circle", {cx: this.state.x, cy: this.state.y, r: radius});
+	    };
+	    return Circle;
+	}(shape_1.Shape));
+	exports.Circle = Circle;
+
+
+/***/ },
+/* 33 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(2);
+	var Shape = (function (_super) {
+	    __extends(Shape, _super);
+	    function Shape() {
+	        _super.apply(this, arguments);
+	        this.mouseMove = this.onMouseMove.bind(this);
+	        this.mouseUp = this.onMouseUp.bind(this);
+	        this.xDelta = 0;
+	        this.yDelta = 0;
+	        this.state = { x: this.props.x, y: this.props.y };
+	    }
+	    Shape.prototype.onMouseDown = function (event) {
+	        if (event.which != 1)
+	            return;
+	        this.xDelta = this.state.x - event.layerX;
+	        this.yDelta = this.state.y - event.layerY;
+	        document.addEventListener("mouseup", this.mouseUp);
+	        document.addEventListener("mousemove", this.mouseMove);
+	    };
+	    Shape.prototype.componentDidMount = function () {
+	        var domElement = ReactDOM.findDOMNode(this);
+	        domElement.addEventListener("mousedown", this.onMouseDown.bind(this));
+	        domElement.addEventListener("dblclick", this.dbClick.bind(this));
+	        domElement.classList.add("shape");
+	    };
+	    Shape.prototype.onMouseMove = function (event) {
+	        if (Shape.isOnDocument(event.pageX, event.pageY)) {
+	            this.setState({ x: event.layerX + this.xDelta, y: event.layerY + this.yDelta });
+	        }
+	    };
+	    Shape.prototype.onMouseUp = function (event) {
+	        document.removeEventListener("mousemove", this.mouseMove);
+	        document.removeEventListener("mouseup", this.mouseUp);
+	        this.props.moveShape(this.props.id, this.state.x, this.state.y);
+	    };
+	    Shape.prototype.dbClick = function (event) {
+	        if (event.altKey) {
+	            this.props.pushBack(this.props.id);
+	        }
+	        else {
+	            this.props.bringForward(this.props.id);
+	        }
+	    };
+	    Shape.isOnDocument = function (x, y) {
+	        return y > 0 && x > 0 &&
+	            x < document.body.clientWidth &&
+	            y < document.body.clientHeight;
+	    };
+	    return Shape;
+	}(React.Component));
+	exports.Shape = Shape;
+
+
+/***/ },
+/* 34 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var React = __webpack_require__(1);
+	var shape_1 = __webpack_require__(33);
+	var Square = (function (_super) {
+	    __extends(Square, _super);
+	    function Square() {
+	        _super.apply(this, arguments);
+	    }
+	    Square.prototype.render = function () {
+	        return (React.createElement("rect", {x: this.state.x - this.props.width / 2, y: this.state.y - this.props.height / 2, width: this.props.width, height: this.props.height}));
+	    };
+	    return Square;
+	}(shape_1.Shape));
+	exports.Square = Square;
+
+
+/***/ },
+/* 35 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var React = __webpack_require__(1);
+	var shape_1 = __webpack_require__(33);
+	var Triangle = (function (_super) {
+	    __extends(Triangle, _super);
+	    function Triangle() {
+	        _super.apply(this, arguments);
+	    }
+	    Triangle.prototype.render = function () {
+	        var top = this.state.x + " " + (this.state.y - this.props.height / 2);
+	        var left = (this.state.x - this.props.width / 2) + " " + (this.state.y + this.props.height / 2);
+	        var right = (this.state.x + this.props.width / 2) + " " + (this.state.y + this.props.height / 2);
+	        var points = top + ", " + left + ", " + right;
+	        return (React.createElement("polygon", {points: points}));
+	    };
+	    return Triangle;
+	}(shape_1.Shape));
+	exports.Triangle = Triangle;
 
 
 /***/ }
